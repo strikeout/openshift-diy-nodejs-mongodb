@@ -7,10 +7,9 @@
 # Will need around 200MB free disk space
 cd ${OPENSHIFT_REPO_DIR}
 
-MONGODB_VERSION=`node -e 'var config_diy=require("./config_diy");console.log(config_diy.mongodb.version)'`
-MONGODB_PORT=`node -e 'var config_diy=require("./config_diy");console.log(config_diy.mongodb.port)'`
-MONGODB_REMOVE_OLD=`node -e 'var config_diy=require("./config_diy");console.log(config_diy.mongodb.removeOld)'`
-# Determine hardware type for pre-compiled linux binary
+MONGODB_VERSION="2.4.8"
+MONGODB_PORT=27017
+MONGODB_REMOVE_OLD=true # Determine hardware type for pre-compiled linux binary
 if [ "`uname -i`" == "x86_64" ]; then
   MONGODB_TYPE="x86_64"
 else
@@ -30,7 +29,7 @@ if [ ! -e ${OPENSHIFT_DATA_DIR}mongodb-linux-${MONGODB_TYPE}-${MONGODB_VERSION}/
     tarball="http://fastdl.mongodb.org/linux/mongodb-linux-${MONGODB_TYPE}-${MONGODB_VERSION}.tgz"
   else
     echo "#### http://fastdl.mongodb.org/linux/mongodb-linux-${MONGODB_TYPE}-${MONGODB_VERSION}.tgz not exist."
-    echo "#### Change mongodb.verion to *2.4.4*"
+    echo "#### Change mongodb.verion to *2.4.8*"
     MONGODB_VERSION="2.4.8"
     tarball="http://fastdl.mongodb.org/linux/mongodb-linux-${MONGODB_TYPE}-2.4.8.tgz"
   fi
@@ -86,22 +85,11 @@ chmod +x ${OPENSHIFT_DATA_DIR}/mongo_shell.sh
 
 # Create environment variables for this version
 cat <<EOF > ${OPENSHIFT_DATA_DIR}/node.sh
-export NODE_VERSION=${NODE_VERSION}
 export MONGODB_VERSION=${MONGODB_VERSION}
 export MONGODB_TYPE=${MONGODB_TYPE}
 export MONGODB_PORT=${MONGODB_PORT}
 export MONGODB_URL=mongodb://${OPENSHIFT_DIY_IP}:${MONGODB_PORT}/
 export TMPDIR=\${OPENSHIFT_TMP_DIR}
-if [ -z \$NODE_DEFINED ]; then
-  export NODE_DEFINED=1
-  export PATH="\${OPENSHIFT_DATA_DIR}node-\${NODE_VERSION}/bin:\${OPENSHIFT_DATA_DIR}mongodb-linux-\${MONGODB_TYPE}-\${MONGODB_VERSION}/bin:\${OPENSHIFT_DATA_DIR}:\$PATH"
-  export npm_config_cache=\${OPENSHIFT_DATA_DIR}node-\${NODE_VERSION}/.npm
-  export npm_config_userconfig=\${OPENSHIFT_DATA_DIR}node-\${NODE_VERSION}/.npmrc
-  export npm_config_userignorefile=\${OPENSHIFT_DATA_DIR}node-\${NODE_VERSION}/.npmignore
-  export npm_config_tmp=\${OPENSHIFT_TMP_DIR}
-  export npm_config_init_module=\${OPENSHIFT_DATA_DIR}node-\${NODE_VERSION}/.npm-init.js
-  export NODE_ENV=production
-fi
+
 EOF
-chmod +x ${OPENSHIFT_DATA_DIR}node.sh
 
